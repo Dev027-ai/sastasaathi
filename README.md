@@ -16,9 +16,9 @@ Then open `http://localhost:8000`. Service-worker offline caching requires local
 
 ## Data and matching
 
-- `data/jan_aushadhi_extracted.csv` is the supplied source file, preserved with its review status.
+- `data/jan_aushadhi_extracted.csv` is the supplied source file, preserved with its review status. In the supplied 2,308 records, 460 lack strength, 216 lack pack size, and 332 have blank or non-positive prices; the app blocks savings for records missing strength/pack or a usable price.
 - `data/medicines.json` is generated from that CSV for quick offline lookup.
-- Search uses deterministic text normalization and fuzzy ranking. Search suggestions are not clinical equivalence decisions.
+- Search uses deterministic text normalization and fuzzy ranking over generic/ingredient names. The supplied dataset does not contain a verified brand-name crosswalk, so brand-name lookup is not yet comprehensive. Search suggestions are not clinical equivalence decisions.
 - Branded price comparison is user-entered in this MVP. We do **not** invent branded prices or claim another brand is equivalent without verified product data.
 - Missing strength or pack details are visibly flagged; uncertain records should not be used to make substitution decisions.
 
