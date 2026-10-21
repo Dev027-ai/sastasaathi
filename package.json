@@ -1,0 +1,8 @@
+{
+  "name": "sastasaathi",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Offline-first medicine price companion for accessible price comparison",
+  "scripts": {"test": "node --test"},
+  "license": "MIT"
+}
