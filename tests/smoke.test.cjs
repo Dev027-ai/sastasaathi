@@ -38,3 +38,16 @@ test('empty and invalid branded prices are not treated as savings', () => {
   assert.equal(calculateSavings('0', 28, {strength:'500 mg', pack:"10's"}).status, 'invalid');
   assert.equal(calculateSavings('abc', 28, {strength:'500 mg', pack:"10's"}).status, 'invalid');
 });
+
+test('prescription image OCR UI is present and explains review/offline limits', () => {
+  const html = fs.readFileSync(path.join(__dirname, '..', 'index.html'), 'utf8');
+  const app = fs.readFileSync(path.join(__dirname, '..', 'app.js'), 'utf8');
+  const readme = fs.readFileSync(path.join(__dirname, '..', 'README.md'), 'utf8');
+  assert.match(html, /id="prescriptionImage"[^>]*accept="image\/\*"/);
+  assert.match(html, /id="ocrText"/);
+  assert.match(html, /id="searchOcrText"/);
+  assert.match(app, /Tesseract\.createWorker\('eng'/);
+  assert.match(app, /worker\.recognize\(file\)/);
+  assert.match(readme, /OCR is not guaranteed offline/);
+  assert.match(readme, /users must review\/edit detected text/);
+});

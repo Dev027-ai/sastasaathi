@@ -29,6 +29,16 @@
       <p id="searchHelp" class="helper-text" data-i18n="searchHelp">You can type a brand name or the medicine ingredient. Common spelling mistakes are okay.</p>
       <div id="voiceStatus" class="voice-status" role="status" aria-live="polite" hidden></div>
       <div class="quick-searches"><span data-i18n="try">Try:</span><button type="button" class="quick-chip" data-query="paracetamol">Paracetamol</button><button type="button" class="quick-chip" data-query="pantoprazole">Pantoprazole</button><button type="button" class="quick-chip" data-query="aspirin">Aspirin</button></div>
+      <div class="ocr-panel" aria-labelledby="ocrTitle">
+        <div class="ocr-heading"><span class="ocr-symbol" aria-hidden="true">▧</span><div><h3 id="ocrTitle" data-i18n="ocrTitle">Or take a photo of the medicine name</h3><p data-i18n="ocrHelp">Choose a clear photo of a printed prescription, medicine strip or box. Check the text before searching.</p></div></div>
+        <label class="ocr-upload" for="prescriptionImage"><span aria-hidden="true">＋</span><span data-i18n="uploadImage">Choose photo</span><input id="prescriptionImage" type="file" accept="image/*" capture="environment"></label>
+        <div id="ocrPreviewWrap" class="ocr-preview-wrap" hidden><img id="ocrPreview" alt="Selected medicine image preview"><button id="readPhoto" type="button" class="secondary-btn" data-i18n="readPhoto">Read text from photo</button><button id="clearOcrImage" type="button" class="secondary-btn ocr-clear" data-i18n="removePhoto">Remove photo</button></div>
+        <div id="ocrProgress" class="ocr-progress" role="status" aria-live="polite" hidden></div>
+        <label class="ocr-text-label" for="ocrText" data-i18n="ocrTextLabel">Text detected (please check it)</label>
+        <textarea id="ocrText" rows="3" placeholder="Detected medicine text will appear here…" data-i18n-placeholder="ocrPlaceholder"></textarea>
+        <button id="searchOcrText" type="button" class="secondary-btn" data-i18n="searchOcr">Search detected text</button>
+        <p class="ocr-caveat" data-i18n="ocrCaveat">OCR can misread names and strengths. Photos stay on this device; this first version needs internet to load its OCR engine. Handwriting may not read correctly. Always verify with a pharmacist.</p>
+      </div>
     </section>
 
     <section id="resultsSection" class="results-section" aria-labelledby="resultsTitle" hidden>

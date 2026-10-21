@@ -26,11 +26,13 @@ Then open `http://localhost:8000`. Service-worker offline caching requires local
 
 Typed search and bundled-data lookup work offline after the first load. Voice search uses the browser's Web Speech API where available; speech recognition may require a supported browser and/or network and is not guaranteed offline. The microphone control is hidden/disabled if unsupported, and typing always remains available.
 
+Prescription/photo OCR supports images of printed medicine names, strips and boxes using Tesseract.js in the browser. Image processing happens on-device; the image is not uploaded to our server. In this prototype, the OCR engine and English language data require internet to load the first time, so OCR is not guaranteed offline. Handwriting is unreliable; users must review/edit detected text before searching. OCR output is never treated as verified medicine identity or medical advice.
+
 ## Sources and credits
 
 - Medicine records: user-provided `jan_aushadhi_extracted.csv` (extracted from a supplied Jan Aushadhi PDF; source pages are included in the data).
 - UI, offline PWA shell, matching logic, and savings calculator: this project.
-- No live APIs or language models are used to generate medicine information.
+- No live APIs or language models are used to generate medicine information. OCR library: Tesseract.js v5 (loaded from jsDelivr on demand); OCR is for text extraction only, not clinical interpretation.
 
 ## License
 
