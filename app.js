@@ -84,11 +84,31 @@
       els.results.innerHTML=`<div class="empty-state"><strong>${esc(t('noResults'))}</strong><p>${esc(t('noResultsHelp'))}</p></div>`;
       return;
     }
-    els.results.innerHTML=results.map((m,i)=>{
+
+    // Elder-friendly, one-result-at-a-time view: large type and no long result list to scroll.
+    let activeIndex=0;
+    const paint = () => {
+      const m=results[activeIndex];
       const meta=[m.strength||t('missingStrength'),m.pack||t('missingPack')].join(' · ');
-      return `<button type="button" class="medicine-result" data-index="${i}" aria-label="${esc(m.name)}, ${esc(meta)}, ${m.price>0?esc(money(m.price)):esc(t('priceMissing'))}"><span class="result-icon" aria-hidden="true">＋</span><span class="result-main"><span class="result-name">${esc(m.name)}</span><span class="result-meta">${esc(meta)} · Code ${esc(m.code)}</span></span><span class="result-price">${m.price>0?esc(money(m.price)):esc(t('priceMissing'))}</span><span class="result-arrow" aria-hidden="true">›</span></button>`;
-    }).join('');
-    [...els.results.querySelectorAll('.medicine-result')].forEach((button,index)=>button.addEventListener('click',()=>chooseMedicine(results[index])));
+      els.results.innerHTML=`
+        <article class="medicine-result featured-medicine-result" aria-live="polite">
+          <div class="featured-result-top"><span class="result-icon" aria-hidden="true">＋</span><span class="featured-result-position">${activeIndex+1} / ${results.length}</span></div>
+          <div class="result-name">${esc(m.name)}</div>
+          <div class="result-meta">${esc(meta)}</div>
+          <div class="featured-result-price">${m.price>0?esc(money(m.price)):esc(t('priceMissing'))}</div>
+          <div class="featured-result-code">Medicine code: ${esc(m.code)}</div>
+          <button type="button" class="button primary featured-select" data-select>${language==='hi'?'यह दवा चुनें':'Select this medicine'} <span aria-hidden="true">→</span></button>
+        </article>
+        <nav class="result-pager" aria-label="Medicine search results">
+          <button type="button" class="button secondary" data-prev ${activeIndex===0?'disabled':''}>← ${language==='hi'?'पिछली':'Previous'}</button>
+          <span class="pager-label">${language==='hi'?'मिलान':'Match'} ${activeIndex+1} ${language==='hi'?'में से':'of'} ${results.length}</span>
+          <button type="button" class="button secondary" data-next ${activeIndex===results.length-1?'disabled':''}>${language==='hi'?'अगली':'Next'} →</button>
+        </nav>`;
+      els.results.querySelector('[data-select]').addEventListener('click',()=>chooseMedicine(m));
+      els.results.querySelector('[data-prev]').addEventListener('click',()=>{if(activeIndex>0){activeIndex--;paint();}});
+      els.results.querySelector('[data-next]').addEventListener('click',()=>{if(activeIndex<results.length-1){activeIndex++;paint();}});
+    };
+    paint();
   }
   function renderSelected(m) {
     const incomplete=[];
