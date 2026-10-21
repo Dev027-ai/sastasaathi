@@ -19,6 +19,7 @@
   };
   let language = 'en';
   let medicines = [];
+  let brandedMedicines = [];
   let selectedMedicine = null;
   let recognition = null;
   let voiceTimeout = null;
@@ -59,7 +60,9 @@
   function search(query) {
     const q=String(query||'').trim();
     if(!q) return [];
-    return medicines.map(m=>({m,score:scoreMedicine(m,q)})).filter(x=>x.score>0).sort((a,b)=>b.score-a.score || (a.m.price||Infinity)-(b.m.price||Infinity)).slice(0,12).map(x=>x.m);
+    const brands=brandedMedicines.map(m=>({m:Object.assign({_brand:true},m),score:Math.max(scoreMedicine({name:m.branded_medicine_name,strength:m.branded_strength_and_form},q),scoreMedicine({name:m.salt_composition,strength:m.branded_strength_and_form},q))})).filter(x=>x.score>0).sort((a,b)=>b.score-a.score).slice(0,8);
+    const generics=medicines.map(m=>({m,score:scoreMedicine(m,q)})).filter(x=>x.score>0).sort((a,b)=>b.score-a.score || (a.m.price||Infinity)-(b.m.price||Infinity)).slice(0,8);
+    return brands.concat(generics).slice(0,12).map(x=>x.m);
   }
   function applyLanguage() {
     document.documentElement.lang=language==='hi'?'hi':'en';
@@ -89,14 +92,14 @@
     let activeIndex=0;
     const paint = () => {
       const m=results[activeIndex];
-      const meta=[m.strength||t('missingStrength'),m.pack||t('missingPack')].join(' · ');
+      const meta=m._brand?[m.salt_composition,m.branded_strength_and_form,m.brand_pack_size].join(' · '):[m.strength||t('missingStrength'),m.pack||t('missingPack')].join(' · ');
       els.results.innerHTML=`
         <article class="medicine-result featured-medicine-result" aria-live="polite">
           <div class="featured-result-top"><span class="result-icon" aria-hidden="true">＋</span><span class="featured-result-position">${activeIndex+1} / ${results.length}</span></div>
-          <div class="result-name">${esc(m.name)}</div>
+          <div class="result-name">${esc(m._brand?m.branded_medicine_name:m.name)}</div>
           <div class="result-meta">${esc(meta)}</div>
-          <div class="featured-result-price">${m.price>0?esc(money(m.price)):esc(t('priceMissing'))}</div>
-          <div class="featured-result-code">Medicine code: ${esc(m.code)}</div>
+          <div class="featured-result-price">${m._brand?(Number(m.branded_listed_price_inr)>0?esc(money(Number(m.branded_listed_price_inr))):esc(t('priceMissing'))):(m.price>0?esc(money(m.price)):esc(t('priceMissing')))}</div>
+          <div class="featured-result-code">${m._brand?'Brand price: source-listed · Manufacturer: '+esc(m.manufacturer||'Not listed'):'Medicine code: '+esc(m.code)}</div>
           <button type="button" class="button primary featured-select" data-select>${language==='hi'?'यह दवा चुनें':'Select this medicine'} <span aria-hidden="true">→</span></button>
         </article>
         <nav class="result-pager" aria-label="Medicine search results">
@@ -114,9 +117,9 @@
     const incomplete=[];
     if(!m.strength) incomplete.push(t('strengthUnknown'));
     if(!m.pack) incomplete.push(t('packUnknown'));
-    els.selected.innerHTML=`<div class="selected-name">${esc(m.name)}</div><div class="selected-meta">${esc(m.strength||t('missingStrength'))} · ${esc(m.pack||t('missingPack'))} · Code ${esc(m.code)}</div><span class="review-flag">${esc(t('humanReview'))}</span>${incomplete.length?`<span class="review-flag">${esc(incomplete.join(' · '))}</span>`:''}`;
+    els.selected.innerHTML=m._brand?('<div class="selected-name">'+esc(m.name)+'</div><div class="selected-meta"><strong>Salt / composition:</strong> '+esc(m.brand.salt_composition)+'</div><div class="selected-meta">'+esc(m.strength)+' · '+esc(m.pack)+' · Manufacturer: '+esc(m.brand.manufacturer||'Not listed')+'</div><span class="review-flag">Brand price is source-listed; current MRP is not independently verified</span>'):(`<div class="selected-name">${esc(m.name)}</div><div class="selected-meta">${esc(m.strength||t('missingStrength'))} · ${esc(m.pack||t('missingPack'))} · Code ${esc(m.code)}</div><span class="review-flag">${esc(t('humanReview'))}</span>${incomplete.length?`<span class="review-flag">${esc(incomplete.join(' · '))}</span>`:''}`);
     els.janPrice.textContent=m.price>0?money(m.price):t('priceMissing');
-    els.janPack.textContent=m.pack?`${esc(m.pack)} · ${t('priceDisclaimer')}`:t('packUnknown');
+    els.janPack.textContent=m._brand?(m.brand.jan_aushadhi_generic_name+' · '+m.brand.jan_aushadhi_pack_size+' · '+t('priceDisclaimer')):(m.pack?`${m.pack} · ${t('priceDisclaimer')}`:t('packUnknown'));
     els.brandPrice.value='';
     els.savingsPanel.classList.remove('negative');
     els.savingsHeadline.textContent=t('enterBrandPrice');
@@ -125,6 +128,16 @@
     els.compareSection.hidden=false;
   }
   function chooseMedicine(m) {
+    if(m && m._brand) {
+      const janPrice=Number(m.jan_aushadhi_mrp_inr);
+      if(!(janPrice>0)) { showToast(t('selectedPriceMissing')); return; }
+      selectedMedicine={name:m.branded_medicine_name,strength:m.branded_strength_and_form,pack:m.brand_pack_size,code:m.jan_aushadhi_drug_code,price:janPrice,_brand:true,brand:m};
+      renderSelected(selectedMedicine);
+      els.brandPrice.value=Number(m.branded_listed_price_inr)>0?String(Number(m.branded_listed_price_inr)):'';
+      updateSavings();
+      els.compareSection.scrollIntoView({behavior:'smooth',block:'start'});
+      return;
+    }
     if(!m || !(m.price>0)) { showToast(t('selectedPriceMissing')); return; }
     selectedMedicine=m;
     renderSelected(m);
@@ -220,11 +233,18 @@
     els.resultsSection.scrollIntoView({behavior:'smooth',block:'start'});
   });
 
+  function parseCSV(text) {
+    const rows=[]; let row=[],cell='',quoted=false;
+    for(let i=0;i<text.length;i++){const ch=text[i];if(ch==='"'&&quoted&&text[i+1]==='"'){cell+='"';i++;}else if(ch==='"'){quoted=!quoted;}else if(ch===','&&!quoted){row.push(cell);cell='';}else if((ch==='\n'||ch==='\r')&&!quoted){if(ch==='\r'&&text[i+1]==='\n')i++;row.push(cell);if(row.some(v=>v.trim()))rows.push(row);row=[];cell='';}else cell+=ch;}
+    if(cell.length||row.length){row.push(cell);rows.push(row);} const headers=(rows.shift()||[]).map(v=>v.trim());
+    return rows.map(values=>Object.fromEntries(headers.map((h,i)=>[h,(values[i]||'').trim()]))).filter(r=>r.branded_medicine_name&&r.salt_composition&&Number(r.branded_listed_price_inr)>0&&Number(r.jan_aushadhi_mrp_inr)>0);
+  }
   async function init() {
     try {
       const response=await fetch('./data/medicines.json',{cache:'force-cache'});
       if(!response.ok) throw new Error('data unavailable');
       medicines=await response.json();
+      try { const brandResponse=await fetch('./data/branded_medicines_500.csv',{cache:'no-cache'}); if(brandResponse.ok) brandedMedicines=parseCSV(await brandResponse.text()); } catch(_) { brandedMedicines=[]; }
     } catch(error) {
       els.resultsSection.hidden=false;
       els.results.innerHTML='<div class="empty-state"><strong>Medicine data could not be loaded</strong><p>Open the app through localhost or HTTPS, reload once, then try offline.</p></div>';
