@@ -22,12 +22,12 @@ jobs:
         run: python scripts/build_branded_medicine_catalog.py
       - name: Commit generated catalogue
         run: |
-          if git diff --quiet -- data/branded_medicines_500.csv; then
+          git add -f data/branded_medicines_500.csv
+          if git diff --cached --quiet -- data/branded_medicines_500.csv; then
             echo "No catalogue changes."
             exit 0
           fi
           git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add data/branded_medicines_500.csv
+          git config user.email "41898282+users.noreply.github.com"
           git commit -m "data: refresh 500 branded medicine comparisons"
           git push
