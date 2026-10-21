@@ -1,0 +1,33 @@
+name: Build branded medicine comparison CSV
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "20 3 1 * *"
+
+permissions:
+  contents: write
+
+jobs:
+  build-catalogue:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Build comparison CSV
+        run: python scripts/build_branded_medicine_catalog.py
+      - name: Commit generated catalogue
+        run: |
+          if git diff --quiet -- data/branded_medicines_500.csv; then
+            echo "No catalogue changes."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/branded_medicines_500.csv
+          git commit -m "data: refresh 500 branded medicine comparisons"
+          git push
