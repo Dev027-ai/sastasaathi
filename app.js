@@ -119,7 +119,9 @@
     if(!m.pack) incomplete.push(t('packUnknown'));
     els.selected.innerHTML=m._brand?('<div class="selected-name">'+esc(m.name)+'</div><div class="selected-meta"><strong>Salt / composition:</strong> '+esc(m.brand.salt_composition)+'</div><div class="selected-meta">'+esc(m.strength)+' · '+esc(m.pack)+' · Manufacturer: '+esc(m.brand.manufacturer||'Not listed')+'</div><span class="review-flag">Brand price is source-listed; current MRP is not independently verified</span>'):(`<div class="selected-name">${esc(m.name)}</div><div class="selected-meta">${esc(m.strength||t('missingStrength'))} · ${esc(m.pack||t('missingPack'))} · Code ${esc(m.code)}</div><span class="review-flag">${esc(t('humanReview'))}</span>${incomplete.length?`<span class="review-flag">${esc(incomplete.join(' · '))}</span>`:''}`);
     els.janPrice.textContent=m.price>0?money(m.price):t('priceMissing');
-    els.janPack.textContent=m._brand?(m.brand.jan_aushadhi_generic_name+' · '+m.brand.jan_aushadhi_pack_size+' · '+t('priceDisclaimer')):(m.pack?`${m.pack} · ${t('priceDisclaimer')}`:t('packUnknown'));
+    els.janPack.textContent=m._brand?('Normalized per-unit comparison · '+m.brand.jan_aushadhi_generic_name+' · '+m.brand.jan_aushadhi_pack_size):(m.pack?`${m.pack} · ${t('priceDisclaimer')}`:t('packUnknown'));
+    const brandPriceLabel=els.compareSection.querySelector('label[for="brandPrice"]');
+    if(brandPriceLabel) brandPriceLabel.textContent=m._brand?'Branded listed price per unit (₹)':t('brandPriceLabel');
     els.brandPrice.value='';
     els.savingsPanel.classList.remove('negative');
     els.savingsHeadline.textContent=t('enterBrandPrice');
@@ -129,11 +131,12 @@
   }
   function chooseMedicine(m) {
     if(m && m._brand) {
-      const janPrice=Number(m.jan_aushadhi_mrp_inr);
-      if(!(janPrice>0)) { showToast(t('selectedPriceMissing')); return; }
+      const janPrice=Number(m.jan_aushadhi_unit_price_inr);
+      const brandUnitPrice=Number(m.branded_unit_price_inr);
+      if(!(janPrice>0) || !(brandUnitPrice>0)) { showToast('Comparable per-unit prices are not available for this record.'); return; }
       selectedMedicine={name:m.branded_medicine_name,strength:m.branded_strength_and_form,pack:m.brand_pack_size,code:m.jan_aushadhi_drug_code,price:janPrice,_brand:true,brand:m};
       renderSelected(selectedMedicine);
-      els.brandPrice.value=Number(m.branded_listed_price_inr)>0?String(Number(m.branded_listed_price_inr)):'';
+      els.brandPrice.value=String(brandUnitPrice);
       updateSavings();
       els.compareSection.scrollIntoView({behavior:'smooth',block:'start'});
       return;
