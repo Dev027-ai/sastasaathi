@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#0b5b50">
+  <meta name="description" content="Find indicative Jan Aushadhi medicine prices and calculate potential savings. Works offline after loading.">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="styles.css">
+  <title>SastaSaathi — Medicine Price Companion</title>
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="#top" aria-label="SastaSaathi home"><span class="brand-mark" aria-hidden="true">₹</span><span><strong>SastaSaathi</strong><small data-i18n="tagline">Medicine price companion</small></span></a>
+    <div class="top-actions"><span class="offline-pill"><span class="status-dot"></span><span data-i18n="offlineReady">Offline ready</span></span><button id="languageToggle" class="language-btn" type="button" aria-label="Change language">हिंदी</button></div>
+  </header>
+
+  <main id="top" class="page-shell">
+    <section class="hero" aria-labelledby="heroTitle">
+      <div class="hero-copy"><p class="eyebrow" data-i18n="eyebrow">A little help at the pharmacy</p><h1 id="heroTitle" data-i18n="heroTitle">Pay less for the <em>same medicine.</em></h1><p class="hero-sub" data-i18n="heroSub">Search a medicine. See the listed Jan Aushadhi price and calculate how much you could save.</p></div>
+      <div class="hero-stamp" aria-hidden="true"><span>₹</span><small data-i18n="priceCheck">PRICE<br>CHECK</small></div>
+    </section>
+
+    <section class="search-card" aria-labelledby="searchTitle">
+      <div class="section-heading"><div><p class="eyebrow" data-i18n="stepOne">STEP 1</p><h2 id="searchTitle" data-i18n="searchTitle">Which medicine?</h2></div><span class="big-step" aria-hidden="true">01</span></div>
+      <label class="search-label" for="medicineSearch" data-i18n="searchLabel">Type the name or tap the microphone</label>
+      <div class="search-row"><div class="search-input-wrap"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.8" cy="10.8" r="6.8"></circle><path d="m16 16 5 5"></path></svg><input id="medicineSearch" type="search" autocomplete="off" spellcheck="false" placeholder="e.g. paracetamol" aria-describedby="searchHelp"><button id="clearSearch" class="clear-btn" type="button" aria-label="Clear search" hidden>×</button></div><button id="voiceButton" class="voice-btn" type="button" aria-label="Search by voice"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="2.5" width="6" height="12" rx="3"></rect><path d="M5.5 11.5a6.5 6.5 0 0 0 13 0M12 18v3m-4 0h8"></path></svg><span data-i18n="speak">Speak</span></button></div>
+      <p id="searchHelp" class="helper-text" data-i18n="searchHelp">You can type a brand name or the medicine ingredient. Common spelling mistakes are okay.</p>
+      <div id="voiceStatus" class="voice-status" role="status" aria-live="polite" hidden></div>
+      <div class="quick-searches"><span data-i18n="try">Try:</span><button type="button" class="quick-chip" data-query="paracetamol">Paracetamol</button><button type="button" class="quick-chip" data-query="pantoprazole">Pantoprazole</button><button type="button" class="quick-chip" data-query="aspirin">Aspirin</button></div>
+    </section>
+
+    <section id="resultsSection" class="results-section" aria-labelledby="resultsTitle" hidden>
+      <div class="section-heading results-heading"><div><p class="eyebrow" data-i18n="stepTwo">STEP 2</p><h2 id="resultsTitle" data-i18n="resultsTitle">Choose a matching record</h2><p id="resultCount" class="muted"></p></div><span class="big-step" aria-hidden="true">02</span></div>
+      <div id="resultsList" class="results-list"></div>
+      <p class="tiny-note" data-i18n="matchNote">Search matches are suggestions, not a medical equivalence check.</p>
+    </section>
+
+    <section id="compareSection" class="compare-section" aria-labelledby="compareTitle" hidden>
+      <div class="section-heading"><div><p class="eyebrow" data-i18n="stepThree">STEP 3</p><h2 id="compareTitle" data-i18n="compareTitle">See your possible savings</h2></div><span class="big-step" aria-hidden="true">03</span></div>
+      <div id="selectedMedicine" class="selected-medicine"></div>
+      <div class="price-compare-grid"><div class="price-tile jan-tile"><span class="tile-label" data-i18n="janPrice">Jan Aushadhi listed price</span><strong id="janPriceValue">—</strong><small id="janPackValue"></small></div><div class="price-tile brand-tile"><label for="brandPrice" data-i18n="brandPriceLabel">Your branded medicine price (₹)</label><div class="rupee-input"><span>₹</span><input id="brandPrice" type="number" min="0" step="0.01" inputmode="decimal" placeholder="e.g. 120" aria-describedby="brandPriceHelp"></div><small id="brandPriceHelp" data-i18n="brandPriceHelp">Enter the price for the same strength and pack size.</small></div></div>
+      <div id="savingsPanel" class="savings-panel" aria-live="polite"><span class="savings-icon" aria-hidden="true">✓</span><div><p id="savingsHeadline" data-i18n="enterBrandPrice">Enter the branded price to calculate savings</p><strong id="savingsAmount">—</strong><small id="savingsPercent"></small></div></div>
+      <div id="alternativeBox" class="alternative-box"><h3 data-i18n="otherOptions">Other lower-price options</h3><p data-i18n="otherOptionsText">We only list alternatives when verified, comparable price data is available. No other brand prices are included in this dataset yet.</p><span class="data-tag" data-i18n="dataGap">Verified brand-price data not loaded</span></div>
+      <button id="resetButton" class="secondary-btn" type="button" data-i18n="searchAnother">Search another medicine</button>
+    </section>
+
+    <section class="how-card"><div class="how-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 3 4.5 6v5.5c0 4.5 3.2 7.7 7.5 9.5 4.3-1.8 7.5-5 7.5-9.5V6L12 3Z"></path><path d="m8.5 12 2.3 2.3 4.7-5"></path></svg></div><div><h3 data-i18n="safeTitle">Your health comes first</h3><p data-i18n="safeText">This tool compares indicative prices only. Do not change or replace any medicine yourself. Ask your doctor or pharmacist to confirm the exact medicine, strength and pack.</p></div></section>
+    <footer><p class="data-warning"><strong data-i18n="dataWarningTitle">About these prices:</strong> <span data-i18n="dataWarning">The bundled source data is marked for human review and its publication date is unverified. Actual prices and stock may differ at the pharmacy.</span></p><div class="footer-line"><span>© 2026 SastaSaathi</span><span data-i18n="offlineFooter">Designed for low-data and offline use</span></div></footer>
+  </main>
+  <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+  <script src="app.js" defer></script>
+</body>
+</html>

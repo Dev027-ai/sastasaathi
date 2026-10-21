@@ -1,0 +1,12 @@
+{
+  "name": "SastaSaathi — Medicine Price Companion",
+  "short_name": "SastaSaathi",
+  "description": "Offline-first indicative medicine price comparison companion.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f7f8f2",
+  "theme_color": "#0b5b50",
+  "lang": "en-IN",
+  "icons": [{"src":"icon.svg","sizes":"any","type":"image/svg+xml","purpose":"any maskable"}]
+}
